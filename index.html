@@ -12,7 +12,7 @@
     .player-2 { background-color: #55aa55; color: white; }
     .player-3 { background-color: #5555ff; color: white; }
     .player-4 { background-color: #ffaa55; color: white; }
-    .player-5 { background-color: #aa55aa; color: white; }
+    .player-5 { background-color: #ffffff; color: #000000; border: 1px solid #cccccc; }
     .winner { border: 5px solid gold; animation: pulse 1s infinite; }
     .reset-button { padding: 10px 20px; background-color: #555555; color: white; border: none; border-radius: 5px; font-size: 16px; margin-top: 20px; cursor: pointer; }
     .status { font-size: 24px; margin: 20px 0; font-weight: bold; }
@@ -90,7 +90,7 @@
     function resetSystem() {
       websocket.send(JSON.stringify({'reset': true}));
     }
-    
+
     function updateWinner(winnerIndex) {
       // Reset all buttons first
       for (let i = 1; i <= 5; i++) {
