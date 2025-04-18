@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>WEB Cerdas Cermat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html { font-family: Arial, sans-serif; text-align: center; }
+    body { max-width: 800px; margin: 0px auto; padding: 30px; }
+    .button-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
+    .player-button { padding: 20px 10px; font-size: 20px; border: none; border-radius: 5px; cursor: pointer; }
+    .player-1 { background-color: #ff5555; color: white; }
+    .player-2 { background-color: #55aa55; color: white; }
+    .player-3 { background-color: #5555ff; color: white; }
+    .player-4 { background-color: #ffaa55; color: white; }
+    .player-5 { background-color: #aa55aa; color: white; }
+    .winner { border: 5px solid gold; animation: pulse 1s infinite; }
+    .reset-button { padding: 10px 20px; background-color: #555555; color: white; border: none; border-radius: 5px; font-size: 16px; margin-top: 20px; cursor: pointer; }
+    .status { font-size: 24px; margin: 20px 0; font-weight: bold; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  </style>
+</head>
+<body>
+  <h1>WEB Cerdas Cermat</h1>
+  <div class="status" id="status">System Ready</div>
+  <div class="button-grid">
+    <button class="player-button player-1" id="player1">Player 1</button>
+    <button class="player-button player-2" id="player2">Player 2</button>
+    <button class="player-button player-3" id="player3">Player 3</button>
+    <button class="player-button player-4" id="player4">Player 4</button>
+    <button class="player-button player-5" id="player5">Player 5</button>
+  </div>
+  <button class="reset-button" id="reset">Reset System</button>
+
+  <script>
+    var gateway = ws://${window.location.hostname}/ws;
+    var websocket;
+    window.addEventListener('load', onLoad);
+    
+    function initWebSocket() {
+      console.log('Trying to open a WebSocket connection...');
+      websocket = new WebSocket(gateway);
+      websocket.onopen = onOpen;
+      websocket.onclose = onClose;
+      websocket.onmessage = onMessage;
+    }
+    
+    function onOpen(event) {
+      console.log('Connection opened');
+    }
+    
+    function onClose(event) {
+      console.log('Connection closed');
+      setTimeout(initWebSocket, 2000);
+    }
+    
+    function onMessage(event) {
+      var data = JSON.parse(event.data);
+      if (data.winner !== undefined) {
+        updateWinner(data.winner);
+      }
+      if (data.reset !== undefined && data.reset === true) {
+        resetDisplay();
+      }
+    }
+    
+    function onLoad(event) {
+      initWebSocket();
+      document.getElementById('reset').addEventListener('click', resetSystem);
+      
+      // Add event listeners for player buttons
+      // for (let i = 1; i <= 5; i++) {
+      //   document.getElementById('player'+i).addEventListener('click', function() {
+      //     buttonPressed(i-1);
+      //   });
+      // }
+    }
+    
+    function buttonPressed(player) {
+      websocket.send(JSON.stringify({'button': player}));
+    }
+    
+    function resetSystem() {
+      websocket.send(JSON.stringify({'reset': true}));
+    }
+    
+    function updateWinner(winnerIndex) {
+      // Reset all buttons first
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById('player'+i).classList.remove('winner');
+      }
+      
+      if (winnerIndex >= 0 && winnerIndex < 5) {
+        document.getElementById('player'+(winnerIndex+1)).classList.add('winner');
+        document.getElementById('status').innerText = 'Player ' + (winnerIndex+1) + ' pressed first!';
+      }
+    }
+    
+    function resetDisplay() {
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById('player'+i).classList.remove('winner');
+      }
+      document.getElementById('status').innerText = 'System Ready';
+    }
+  </script>
+</body>
+</html>
